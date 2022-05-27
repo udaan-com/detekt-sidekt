@@ -1,6 +1,7 @@
 package io.github.thewisenerd.linters.sidekt.rules
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.Gson
 import io.github.thewisenerd.linters.sidekt.helpers.Debugger
 import io.gitlab.arturbosch.detekt.api.*
 import org.jetbrains.kotlin.psi.*
@@ -98,7 +99,7 @@ class SQLQuerySniffer(config: Config): Rule(config) {
                 pName to typeName
             }.let { params ->
                 val pMap = params.toMap()
-                objectMapper.writeValueAsString(
+                gson.toJson(
                     SniffedQueryMetaData(
                         query = processQuery(query),
                         params = pMap,
@@ -290,6 +291,7 @@ class SQLQuerySniffer(config: Config): Rule(config) {
         private var scanResourceFiles = false
 
         private val objectMapper by lazy { ObjectMapper() }
+        private val gson by lazy { Gson() }
     }
 }
 
