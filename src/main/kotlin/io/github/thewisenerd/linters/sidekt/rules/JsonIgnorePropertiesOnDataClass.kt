@@ -4,6 +4,12 @@ import io.github.thewisenerd.linters.sidekt.helpers.Debugger
 import io.gitlab.arturbosch.detekt.api.*
 import org.jetbrains.kotlin.psi.*
 
+/**
+ * This rule enforces the use of the `@JsonIgnoreProperties` annotation on all data classes within the codebase.
+ *
+ * Severity: Maintainability
+ * Debt: 5min
+ */
 class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
 
     companion object {
