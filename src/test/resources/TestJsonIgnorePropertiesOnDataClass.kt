@@ -21,3 +21,9 @@ data class SampleWithWrongAnnotation(
     val firstVariable: String,
     val secondVariable: Int
 )
+
+@JsonIgnoreProperties(allowSetters = true, ignoreUnknown = true)
+data class SampleWithMultipleAnnotation(
+    val firstVariable: String,
+    val secondVariable: Int
+)
