@@ -3,21 +3,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SampleWithAnnotation(
     val firstVariable: String,
-    val secondVariable: Int,
+    val secondVariable: Int
 )
 
 data class SampleWithoutAnnotation(
     val firstVariable: String,
-    val secondVariable: Int,
+    val secondVariable: Int
 )
 
 data class SampleWithoutAnnotationWithJvmOverloads @JvmOverloads constructor(
     val firstVariable: String,
-    val secondVariable: Int,
+    val secondVariable: Int = 1
 )
 
 @JsonIgnoreProperties(allowSetters = true)
-data class SampleWithAnnotationV2(
+data class SampleWithWrongAnnotation(
     val firstVariable: String,
-    val secondVariable: Int,
+    val secondVariable: Int
 )

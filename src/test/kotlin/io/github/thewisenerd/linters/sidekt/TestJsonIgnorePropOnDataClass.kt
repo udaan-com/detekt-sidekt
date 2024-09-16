@@ -14,7 +14,7 @@ class TestJsonIgnorePropOnDataClass {
 
         private fun ensureJsonIgnorePropOnDataClassFindings(
             findings: List<Finding>,
-            requiredFindings: List<SourceLocation>,
+            requiredFindings: List<SourceLocation>
         ) = TestUtils.ensureFindings(jsonIgnorePropOnDataClass, findings, requiredFindings)
     }
 
@@ -34,14 +34,15 @@ class TestJsonIgnorePropOnDataClass {
 
     @Test
     fun testDataClasses() {
-        val code = TestUtils.readFile("TestJsonIgnorePropOnDataClass.kt")
+        val code = TestUtils.readFile("TestJsonIgnorePropertiesOnDataClass.kt")
         val findings = subject.compileAndLintWithContext(TestUtils.env, code)
         ensureJsonIgnorePropOnDataClassFindings(
             findings,
             listOf(
                 SourceLocation(9, 1),
                 SourceLocation(14, 1),
-            ),
+                SourceLocation(19, 1)
+            )
         )
     }
 }
