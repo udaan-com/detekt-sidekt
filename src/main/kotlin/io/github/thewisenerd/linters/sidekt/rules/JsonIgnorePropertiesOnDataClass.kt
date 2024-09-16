@@ -37,7 +37,7 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
     }
 
     private val excludedPackages: Set<String> by lazy {
-        readConfig("excludedPackages")
+        readConfig("excludes")
     }
 
     override val issue: Issue = Issue(

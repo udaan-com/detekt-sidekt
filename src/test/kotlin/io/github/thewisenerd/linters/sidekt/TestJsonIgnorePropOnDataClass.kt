@@ -39,7 +39,7 @@ class TestJsonIgnorePropOnDataClass {
             return when (key) {
                 "active" -> true as? T
                 "debug" -> "stderr" as? T
-                "excludedPackages" -> arrayListOf("io.github.thewisenerd", "io.github.thewisenerd.linters") as? T
+                "excludes" -> arrayListOf("io.github.thewisenerd", "io.github.thewisenerd.linters") as? T
                 else -> null
             }
         }
