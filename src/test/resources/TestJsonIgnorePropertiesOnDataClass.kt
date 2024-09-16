@@ -1,3 +1,5 @@
+package io.github.thewisenerd.linters.sidekt
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)

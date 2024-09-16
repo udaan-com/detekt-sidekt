@@ -30,7 +30,22 @@ class TestJsonIgnorePropOnDataClass {
             }
         }
     }
+
+    private val testConfigWithExcludedPackage = object : Config {
+        override fun subConfig(key: String): Config = this
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : Any> valueOrNull(key: String): T? {
+            return when (key) {
+                "active" -> true as? T
+                "debug" -> "stderr" as? T
+                "excludedPackages" -> arrayListOf("io.github.thewisenerd", "io.github.thewisenerd.linters") as? T
+                else -> null
+            }
+        }
+    }
     private val subject = JsonIgnorePropertiesOnDataClass(testConfig)
+    private val subjectWithExcludedPackage = JsonIgnorePropertiesOnDataClass(testConfigWithExcludedPackage)
 
     @Test
     fun testDataClasses() {
@@ -39,10 +54,20 @@ class TestJsonIgnorePropOnDataClass {
         ensureJsonIgnorePropOnDataClassFindings(
             findings,
             listOf(
-                SourceLocation(9, 1),
-                SourceLocation(14, 1),
-                SourceLocation(19, 1)
+                SourceLocation(11, 1),
+                SourceLocation(16, 1),
+                SourceLocation(21, 1)
             )
+        )
+    }
+
+    @Test
+    fun testDataClassesWithExcludedPackage() {
+        val code = TestUtils.readFile("TestJsonIgnorePropertiesOnDataClass.kt")
+        val findings = subjectWithExcludedPackage.compileAndLintWithContext(TestUtils.env, code)
+        ensureJsonIgnorePropOnDataClassFindings(
+            findings,
+            emptyList()
         )
     }
 }
