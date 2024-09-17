@@ -1,24 +1,38 @@
 package io.github.thewisenerd.linters.sidekt.rules
 
 import io.github.thewisenerd.linters.sidekt.helpers.Debugger
-import io.gitlab.arturbosch.detekt.api.*
+import io.gitlab.arturbosch.detekt.api.CodeSmell
+import io.gitlab.arturbosch.detekt.api.Config
+import io.gitlab.arturbosch.detekt.api.Debt
+import io.gitlab.arturbosch.detekt.api.Entity
+import io.gitlab.arturbosch.detekt.api.Issue
+import io.gitlab.arturbosch.detekt.api.Rule
+import io.gitlab.arturbosch.detekt.api.Severity
 import org.jetbrains.kotlin.psi.KtClass
 
 /**
  * This rule enforces the use of the `@JsonIgnoreProperties` annotation on all data classes within the codebase.
+ * Data classes must be annotated with `@JsonIgnoreProperties(ignoreUnknown = true)` to ensure compatibility with JSON deserialization.
  *
- * Severity: Maintainability
- * Debt: 5min
+ * **Exclusions**: Packages listed in the `excludedPackages` configuration are excluded from this check.
  *
- * Usage:
+ * **Severity**: Maintainability
+ * **Debt**: 5 minutes
+ *
+ * **Usage**:
+ * ```yaml
  * JsonIgnorePropertiesOnDataClass:
  *   active: true
  *   excludes: "com.example.excluded, another.package"
+ * ```
  */
+
 class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
 
     companion object {
         private const val JSON_IGNORE_ANNOTATION = "JsonIgnoreProperties"
+        private const val JSON_IGNORE_ANNOTATION_FULL_QUALIFIED_NAME =
+            "com.fasterxml.jackson.annotation.JsonIgnoreProperties"
         private const val IGNORE_UNKNOWN = "ignoreUnknown"
     }
 
@@ -63,7 +77,13 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
         if (kclass.isData()) {
             // Check if @JsonIgnoreProperties(ignoreUnknown = true) annotation exists
             val hasJsonIgnoreProperties = kclass.annotationEntries.any { annotation ->
-                annotation.shortName?.asString() == JSON_IGNORE_ANNOTATION &&
+                // Get fully qualified import paths
+                val fullyQualifiedImportNames = kclass.containingKtFile.importDirectives.mapNotNull { importDirective ->
+                    importDirective.importPath?.pathStr
+                }.toSet()
+
+                JSON_IGNORE_ANNOTATION_FULL_QUALIFIED_NAME in fullyQualifiedImportNames &&
+                        annotation.shortName?.asString() == JSON_IGNORE_ANNOTATION &&
                         annotation.valueArguments.any {
                             it.getArgumentExpression()?.text == true.toString() &&
                                     it.getArgumentName()?.asName.toString() == IGNORE_UNKNOWN
