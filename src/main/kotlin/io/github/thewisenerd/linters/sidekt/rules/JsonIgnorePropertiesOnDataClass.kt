@@ -2,7 +2,9 @@ package io.github.thewisenerd.linters.sidekt.rules
 
 import io.github.thewisenerd.linters.sidekt.helpers.Debugger
 import io.gitlab.arturbosch.detekt.api.*
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtFile
 
 /**
  * This rule enforces the use of the `@JsonIgnoreProperties` annotation on all data classes within the codebase.
@@ -25,7 +27,8 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
 
     companion object {
         private const val JSON_IGNORE_ANNOTATION = "JsonIgnoreProperties"
-        private const val JSON_IGNORE_ANNOTATION_PACKAGE_NAME = "com.fasterxml.jackson.annotation"
+        private val JSON_IGNORE_ANNOTATION_FQ = FqName("com.fasterxml.jackson.annotation.JsonIgnoreProperties")
+        private val JSON_IGNORE_ANNOTATION_PACKAGE_FQ = JSON_IGNORE_ANNOTATION_FQ.parent()
         private const val IGNORE_UNKNOWN = "ignoreUnknown"
     }
 
@@ -70,17 +73,24 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
         if (kclass.isData()) {
             // Check if @JsonIgnoreProperties(ignoreUnknown = true) annotation exists
             val hasJsonIgnoreProperties = kclass.annotationEntries.any { annotation ->
-                // Get fully qualified import paths
-                val fullyQualifiedImportNames = kclass.containingKtFile.importDirectives.mapNotNull { importDirective ->
-                    importDirective.importPath?.pathStr
-                }.toSet()
-
-                fullyQualifiedImportNames.any { it.startsWith(JSON_IGNORE_ANNOTATION_PACKAGE_NAME) } &&
-                        annotation.shortName?.asString() == JSON_IGNORE_ANNOTATION &&
-                        annotation.valueArguments.any {
-                            it.getArgumentExpression()?.text == true.toString() &&
-                                    it.getArgumentName()?.asName.toString() == IGNORE_UNKNOWN
+                if (annotation.shortName?.identifier == JSON_IGNORE_ANNOTATION) {
+                    val correctPackageImport = hasDirectImport(
+                        kclass.containingKtFile,
+                        JSON_IGNORE_ANNOTATION_FQ
+                    ) || hasWildCardImport(kclass.containingKtFile, JSON_IGNORE_ANNOTATION_PACKAGE_FQ)
+                    if (correctPackageImport) {
+                        val ignoreUnknown = annotation.valueArguments.find {
+                            it.getArgumentName()?.asName?.identifier == IGNORE_UNKNOWN
                         }
+
+                        // assuming no compilation errors, getArgumentExpression() would be a boolean constant
+                        ignoreUnknown != null && ignoreUnknown.getArgumentExpression()?.text == "true"
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
             }
 
             // Report if annotation is missing
@@ -97,5 +107,18 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
                 dbg.i("JsonIgnoreProperties annotation is present for data class ${kclass.name}")
             }
         }
+    }
+}
+
+private fun hasDirectImport(file: KtFile, fqName: FqName): Boolean {
+    return file.importDirectives.any { import ->
+        import.importedFqName == fqName
+    }
+}
+
+// rudimentary, does not handle cases where people alias imports
+private fun hasWildCardImport(file: KtFile, parentFqName: FqName): Boolean {
+    return file.importDirectives.any { import ->
+        import.isAllUnder && import.importPath?.fqName == parentFqName
     }
 }
