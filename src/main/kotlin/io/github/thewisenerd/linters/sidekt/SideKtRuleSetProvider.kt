@@ -18,7 +18,8 @@ class SideKtRuleSetProvider : RuleSetProvider {
             ResourceOnboardedOnAsec(config),
             SQLQuerySniffer(config),
             ImageQuality(config),
-            ImageWidth(config)
+            ImageWidth(config),
+            JsonIgnorePropertiesOnDataClass(config)
         )
     )
 }

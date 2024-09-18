@@ -10,6 +10,7 @@ Inspections provided:
    non-blocking alternatives
  - **JerseyMethodParameterDefaultValue**: infer if a probable jersey method contains a parameter with a default value
 - **JerseyMainThreadBlockingCall**: infer if a probable jersey resource method contains a main thread blocking call(runblocking)
+- **JsonIgnorePropertiesOnDataClass**: infer if a data class is not annotated with `@JsonIgnoreProperties(ignoreUnknown=true)`.
 
 ## detekt run
 
@@ -139,3 +140,17 @@ sidekt:
     active: true
     # debug: 'stderr'
 ```
+
+## JsonIgnorePropertiesOnDataClass
+```yml
+sidekt:
+   JsonIgnorePropertiesOnDataClass:
+    active: true
+    excludes: "com.example.excluded, another.package"
+    # debug: 'stderr'
+```
+#### JsonIgnorePropertiesOnDataClass
+This rule enforces the use of the `@JsonIgnoreProperties` annotation on all data classes within the codebase. 
+Data classes must be annotated with `@JsonIgnoreProperties(ignoreUnknown = true)` to ensure compatibility with JSON deserialization.
+### excludes
+This allows exclusion of certain packages where you don't want to run the check
