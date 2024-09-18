@@ -25,7 +25,7 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
 
     companion object {
         private const val JSON_IGNORE_ANNOTATION = "JsonIgnoreProperties"
-        private const val JSON_IGNORE_ANNOTATION_IMPORT_NAME = "com.fasterxml.jackson.annotation"
+        private const val JSON_IGNORE_ANNOTATION_PACKAGE_NAME = "com.fasterxml.jackson.annotation"
         private const val IGNORE_UNKNOWN = "ignoreUnknown"
     }
 
@@ -75,7 +75,7 @@ class JsonIgnorePropertiesOnDataClass(config: Config) : Rule(config) {
                     importDirective.importPath?.pathStr
                 }.toSet()
 
-                fullyQualifiedImportNames.any { it.startsWith(JSON_IGNORE_ANNOTATION_IMPORT_NAME) } &&
+                fullyQualifiedImportNames.any { it.startsWith(JSON_IGNORE_ANNOTATION_PACKAGE_NAME) } &&
                         annotation.shortName?.asString() == JSON_IGNORE_ANNOTATION &&
                         annotation.valueArguments.any {
                             it.getArgumentExpression()?.text == true.toString() &&
